@@ -26,6 +26,7 @@ class DrillSelectScreen extends StatefulWidget {
 
 class _DrillSelectScreenState extends State<DrillSelectScreen> {
   late DrillId _selected;
+  bool _useBooster = false;
 
   @override
   void initState() {
@@ -39,6 +40,8 @@ class _DrillSelectScreenState extends State<DrillSelectScreen> {
     final game = context.watch<GameProvider>();
     final zone = zoneById(widget.zoneId);
     final hasEnergy = game.profile.energy >= kExpeditionEnergyCost;
+    final hasBooster = game.profile.drillBoosters > 0;
+    final boosting = _useBooster && hasBooster;
 
     return Scaffold(
       body: ScreenBackground(
@@ -82,7 +85,46 @@ class _DrillSelectScreenState extends State<DrillSelectScreen> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+                child: GestureDetector(
+                  onTap: hasBooster ? () => setState(() => _useBooster = !_useBooster) : null,
+                  child: LavaPanel(
+                    borderColor: boosting ? AppColors.emberGold : AppColors.panelBorder,
+                    borderWidth: boosting ? 2.0 : 1.2,
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    child: Opacity(
+                      opacity: hasBooster ? 1 : 0.5,
+                      child: Row(
+                        children: [
+                          Image.asset(GameAssets.drillBooster, width: 40, height: 40, fit: BoxFit.contain),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('Drill Booster', style: AppTextStyles.bodyStrong),
+                                Text(
+                                  hasBooster
+                                      ? '+25% speed, -30% heat gain this run  (owned: ${game.profile.drillBoosters})'
+                                      : 'None owned - buy in the Resource Shop',
+                                  style: AppTextStyles.caption,
+                                ),
+                              ],
+                            ),
+                          ),
+                          Checkbox(
+                            value: boosting,
+                            onChanged: hasBooster ? (v) => setState(() => _useBooster = v ?? false) : null,
+                            activeColor: AppColors.emberGold,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
                 child: Row(
                   children: [
                     Material(
@@ -108,9 +150,13 @@ class _DrillSelectScreenState extends State<DrillSelectScreen> {
                             ? () {
                                 game.selectDrill(_selected);
                                 game.spendEnergy(kExpeditionEnergyCost);
+                                final consumedBooster = boosting && game.consumeDrillBooster();
                                 Navigator.of(context).pushReplacement(
                                   MaterialPageRoute(
-                                    builder: (_) => GameplayScreen(zoneId: widget.zoneId),
+                                    builder: (_) => GameplayScreen(
+                                      zoneId: widget.zoneId,
+                                      useBooster: consumedBooster,
+                                    ),
                                   ),
                                 );
                               }

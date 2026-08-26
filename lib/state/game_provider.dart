@@ -14,6 +14,7 @@ import '../services/haptics_service.dart';
 import '../services/save_service.dart';
 
 const int kEnergyRegenSeconds = 180; // 1 energy every 3 minutes
+const int kDrillBoosterCrystalCost = 25;
 
 class GameProvider extends ChangeNotifier {
   final SaveService _saveService = SaveService();
@@ -312,6 +313,25 @@ class GameProvider extends ChangeNotifier {
     profile.crystals += 15;
     _persist();
     notifyListeners();
+  }
+
+  bool buyDrillBooster() {
+    if (profile.crystals < kDrillBoosterCrystalCost) return false;
+    profile.crystals -= kDrillBoosterCrystalCost;
+    profile.drillBoosters += 1;
+    _persist();
+    notifyListeners();
+    return true;
+  }
+
+  /// Consumes one owned booster for the expedition about to start. Returns
+  /// false (and consumes nothing) if none are owned.
+  bool consumeDrillBooster() {
+    if (profile.drillBoosters <= 0) return false;
+    profile.drillBoosters -= 1;
+    _persist();
+    notifyListeners();
+    return true;
   }
 
   bool exchangeCrystalsForOre(int crystalCost, int oreAmount) {

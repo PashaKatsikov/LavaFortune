@@ -22,7 +22,8 @@ import 'widgets/relic_overlay.dart';
 
 class GameplayScreen extends StatefulWidget {
   final ZoneId zoneId;
-  const GameplayScreen({super.key, required this.zoneId});
+  final bool useBooster;
+  const GameplayScreen({super.key, required this.zoneId, this.useBooster = false});
 
   @override
   State<GameplayScreen> createState() => _GameplayScreenState();
@@ -42,7 +43,7 @@ class _GameplayScreenState extends State<GameplayScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final game = context.read<GameProvider>();
       final run = context.read<RunProvider>();
-      run.start(widget.zoneId, game.effectiveStats);
+      run.start(widget.zoneId, game.effectiveStats, boosted: widget.useBooster);
       AudioService.instance.playSfx(GameAssets.sfxDrillStart);
     });
   }

@@ -39,6 +39,9 @@ class RunState {
   bool bossOffered = false;
   bool bossDefeated = false;
 
+  /// Whether a Drill Booster was consumed to start this expedition.
+  bool boosterActive = false;
+
   final List<RunLogEntry> log = [];
 
   RunState({

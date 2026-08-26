@@ -69,6 +69,10 @@ class GameplayHud extends StatelessWidget {
               _HaulChip(asset: GameAssets.rareOre, value: run.oreCollected),
               const SizedBox(width: 10),
               _HaulChip(asset: GameAssets.coolingCrystal, value: run.crystalsCollected),
+              if (run.boosterActive) ...[
+                const SizedBox(width: 10),
+                const _BoosterBadge(),
+              ],
             ],
           ),
         ],
@@ -100,6 +104,32 @@ class _HaulChip extends StatelessWidget {
           Image.asset(asset, width: 16, height: 16, fit: BoxFit.contain),
           const SizedBox(width: 6),
           Text('$value', style: AppTextStyles.stat),
+        ],
+      ),
+    );
+  }
+}
+
+/// Reminds the player that this run's heat gain is reduced and speed is
+/// boosted, so the risk/reward math they see on screen differs from usual.
+class _BoosterBadge extends StatelessWidget {
+  const _BoosterBadge();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: AppColors.emberGold.withValues(alpha: 0.22),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.emberGold),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Image.asset(GameAssets.drillBooster, width: 16, height: 16, fit: BoxFit.contain),
+          const SizedBox(width: 6),
+          Text('BOOST', style: AppTextStyles.stat.copyWith(color: AppColors.emberGold)),
         ],
       ),
     );

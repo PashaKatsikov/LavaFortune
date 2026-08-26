@@ -64,6 +64,39 @@ class ResourceShopScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 18),
+                    Text('Expedition Consumables', style: AppTextStyles.sectionTitle),
+                    const SizedBox(height: 10),
+                    LavaPanel(
+                      child: Row(
+                        children: [
+                          Image.asset(GameAssets.drillBooster, width: 48, height: 48, fit: BoxFit.contain),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('Drill Booster', style: AppTextStyles.bodyStrong),
+                                Text(
+                                  '+25% speed, -30% heat gain for one expedition',
+                                  style: AppTextStyles.caption,
+                                ),
+                                Text('Owned: ${game.profile.drillBoosters}', style: AppTextStyles.caption),
+                              ],
+                            ),
+                          ),
+                          LavaButton(
+                            label: '$kDrillBoosterCrystalCost',
+                            icon: Icons.auto_awesome,
+                            height: 40,
+                            fontSize: 13,
+                            onPressed: game.profile.crystals >= kDrillBoosterCrystalCost
+                                ? () => game.buyDrillBooster()
+                                : null,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 18),
                     Text('Exchange Crystals for Ore', style: AppTextStyles.sectionTitle),
                     const SizedBox(height: 10),
                     ..._offers.map((offer) {

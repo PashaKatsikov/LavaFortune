@@ -14,6 +14,11 @@ import '../services/haptics_service.dart';
 /// inside the Volcano Heart zone.
 const double kBossDepthThreshold = 1900;
 
+/// Multipliers applied for the duration of a run when a Drill Booster is
+/// consumed at expedition start.
+const double kBoosterHeatGainMultiplier = 0.7;
+const double kBoosterSpeedMultiplier = 1.25;
+
 class RunProvider extends ChangeNotifier {
   RunState? _run;
   EffectiveStats? _stats;
@@ -22,8 +27,19 @@ class RunProvider extends ChangeNotifier {
 
   RunState? get run => _run;
 
-  void start(ZoneId zoneId, EffectiveStats stats) {
-    _stats = stats;
+  void start(ZoneId zoneId, EffectiveStats stats, {bool boosted = false}) {
+    _stats = boosted
+        ? EffectiveStats(
+            maxHp: stats.maxHp,
+            maxHeat: stats.maxHeat,
+            collisionPower: stats.collisionPower,
+            heatGainMultiplier: stats.heatGainMultiplier * kBoosterHeatGainMultiplier,
+            coolingMultiplier: stats.coolingMultiplier,
+            resourceMultiplier: stats.resourceMultiplier,
+            rareFindChance: stats.rareFindChance,
+            speed: stats.speed * kBoosterSpeedMultiplier,
+          )
+        : stats;
     _overheatWarned = false;
     _run = RunState(
       zoneId: zoneId,
@@ -31,7 +47,10 @@ class RunProvider extends ChangeNotifier {
       hp: stats.maxHp,
       hpMax: stats.maxHp,
     );
-    _run!.addLog('Expedition started.');
+    _run!.boosterActive = boosted;
+    _run!.addLog(
+      boosted ? 'Expedition started with Drill Booster active!' : 'Expedition started.',
+    );
     _generateOptions();
     notifyListeners();
   }

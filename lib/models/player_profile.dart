@@ -35,6 +35,11 @@ class PlayerProfile {
 
   String lastFreeChestDate;
 
+  /// Single-expedition consumables purchased in the shop. Consumed the
+  /// moment an expedition starts with the booster toggled on, regardless of
+  /// how that expedition ends.
+  int drillBoosters;
+
   PlayerProfile({
     required this.ore,
     required this.crystals,
@@ -59,6 +64,7 @@ class PlayerProfile {
     required this.sfxOn,
     required this.vibrationOn,
     this.lastFreeChestDate = '',
+    this.drillBoosters = 0,
   });
 
   factory PlayerProfile.fresh() {
@@ -86,6 +92,7 @@ class PlayerProfile {
       sfxOn: true,
       vibrationOn: true,
       lastFreeChestDate: '',
+      drillBoosters: 0,
     );
   }
 
@@ -115,6 +122,7 @@ class PlayerProfile {
         'sfxOn': sfxOn,
         'vibrationOn': vibrationOn,
         'lastFreeChestDate': lastFreeChestDate,
+        'drillBoosters': drillBoosters,
       };
 
   /// Maps a stored enum index onto [values], dropping entries that no longer
@@ -212,6 +220,7 @@ class PlayerProfile {
       sfxOn: json['sfxOn'] as bool? ?? true,
       vibrationOn: json['vibrationOn'] as bool? ?? true,
       lastFreeChestDate: json['lastFreeChestDate'] as String? ?? '',
+      drillBoosters: json['drillBoosters'] as int? ?? 0,
     );
   }
 }
