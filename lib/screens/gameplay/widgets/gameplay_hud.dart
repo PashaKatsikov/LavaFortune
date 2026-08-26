@@ -8,8 +8,9 @@ import '../../../widgets/stat_bar.dart';
 class GameplayHud extends StatelessWidget {
   final RunState run;
   final VoidCallback onPause;
+  final VoidCallback onVent;
 
-  const GameplayHud({super.key, required this.run, required this.onPause});
+  const GameplayHud({super.key, required this.run, required this.onPause, required this.onVent});
 
   Color get _heatColor {
     if (run.heatPercent > 0.8) return AppColors.danger;
@@ -51,6 +52,12 @@ class GameplayHud extends StatelessWidget {
                 percent: run.heatPercent,
                 color: _heatColor,
                 label: '${(run.heatPercent * 100).round()}%',
+              ),
+              const SizedBox(width: 10),
+              _RoundButton(
+                icon: Icons.ac_unit,
+                onTap: run.ventUsed || run.status != RunStatus.running ? null : onVent,
+                dimmed: run.ventUsed,
               ),
             ],
           ),
@@ -138,20 +145,24 @@ class _BoosterBadge extends StatelessWidget {
 
 class _RoundButton extends StatelessWidget {
   final IconData icon;
-  final VoidCallback onTap;
-  const _RoundButton({required this.icon, required this.onTap});
+  final VoidCallback? onTap;
+  final bool dimmed;
+  const _RoundButton({required this.icon, required this.onTap, this.dimmed = false});
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: AppColors.panel.withValues(alpha: 0.85),
-      shape: const CircleBorder(side: BorderSide(color: AppColors.panelBorder)),
-      child: InkWell(
-        customBorder: const CircleBorder(),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(10),
-          child: Icon(icon, color: AppColors.textPrimary, size: 20),
+    return Opacity(
+      opacity: dimmed ? 0.4 : 1,
+      child: Material(
+        color: AppColors.panel.withValues(alpha: 0.85),
+        shape: const CircleBorder(side: BorderSide(color: AppColors.panelBorder)),
+        child: InkWell(
+          customBorder: const CircleBorder(),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(10),
+            child: Icon(icon, color: AppColors.textPrimary, size: 20),
+          ),
         ),
       ),
     );

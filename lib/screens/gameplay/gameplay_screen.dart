@@ -164,7 +164,11 @@ class _GameplayScreenState extends State<GameplayScreen> {
             SafeArea(
               child: Column(
                 children: [
-                  GameplayHud(run: run, onPause: () => runProvider.togglePause()),
+                  GameplayHud(
+                    run: run,
+                    onPause: () => runProvider.togglePause(),
+                    onVent: () => runProvider.ventHeat(),
+                  ),
                   Expanded(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.end,

@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'core/app_colors.dart';
 import 'screens/loading/loading_screen.dart';
+import 'services/attribution_service.dart';
 import 'state/game_provider.dart';
 import 'state/run_provider.dart';
 
@@ -23,6 +26,9 @@ Future<void> main() async {
     systemNavigationBarColor: AppColors.backgroundDeep,
     systemNavigationBarIconBrightness: Brightness.light,
   ));
+  // Fire-and-forget: attribution resolves asynchronously in the background
+  // and must never delay the first frame the player sees.
+  unawaited(AttributionService.instance.init());
   runApp(const LavaFortuneApp());
 }
 

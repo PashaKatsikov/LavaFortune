@@ -19,6 +19,10 @@ const double kBossDepthThreshold = 1900;
 const double kBoosterHeatGainMultiplier = 0.7;
 const double kBoosterSpeedMultiplier = 1.25;
 
+/// Fraction of the drill's maximum heat cleared by the one-time emergency
+/// vent available during every expedition.
+const double kVentHeatFraction = 0.38;
+
 class RunProvider extends ChangeNotifier {
   RunState? _run;
   EffectiveStats? _stats;
@@ -514,6 +518,21 @@ class RunProvider extends ChangeNotifier {
       return;
     }
     _generateOptions();
+    notifyListeners();
+  }
+
+  /// One-time emergency heat vent, available while the drill is active.
+  /// Instantly clears a chunk of accumulated heat with no other cost, giving
+  /// the player a safety valve against a sudden overheat spiral.
+  void ventHeat() {
+    final run = _run;
+    if (run == null || run.ventUsed) return;
+    if (run.status != RunStatus.running && run.status != RunStatus.paused) return;
+    run.ventUsed = true;
+    _reduceHeat(run.heatMax * kVentHeatFraction);
+    HapticsService.instance.medium();
+    AudioService.instance.playSfx(GameAssets.sfxUpgradeComplete);
+    run.addLog('Emergency heat vent activated! Heat released.', positive: true);
     notifyListeners();
   }
 

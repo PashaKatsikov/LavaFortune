@@ -42,6 +42,9 @@ class RunState {
   /// Whether a Drill Booster was consumed to start this expedition.
   bool boosterActive = false;
 
+  /// The emergency heat vent can be triggered at most once per expedition.
+  bool ventUsed = false;
+
   final List<RunLogEntry> log = [];
 
   RunState({
