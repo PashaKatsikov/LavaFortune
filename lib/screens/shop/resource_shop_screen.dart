@@ -40,25 +40,41 @@ class ResourceShopScreen extends StatelessWidget {
                   children: [
                     LavaPanel(
                       borderColor: game.canClaimFreeChest ? AppColors.success : AppColors.panelBorder,
-                      child: Row(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Image.asset(GameAssets.resourceContainer, width: 52, height: 52),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('Daily Free Chest', style: AppTextStyles.bodyStrong),
-                                Text('120 ore + 15 crystals', style: AppTextStyles.caption),
-                              ],
-                            ),
+                          Row(
+                            children: [
+                              Image.asset(GameAssets.resourceContainer, width: 52, height: 52),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text('Daily Free Chest', style: AppTextStyles.bodyStrong),
+                                    Text(
+                                      '${game.nextFreeChestReward.ore} ore + '
+                                      '${game.nextFreeChestReward.crystals} crystals',
+                                      style: AppTextStyles.caption,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              LavaButton(
+                                label: game.canClaimFreeChest ? 'CLAIM' : 'CLAIMED',
+                                style: LavaButtonStyle.success,
+                                height: 40,
+                                fontSize: 13,
+                                onPressed: game.canClaimFreeChest ? () => game.claimFreeChest() : null,
+                              ),
+                            ],
                           ),
-                          LavaButton(
-                            label: game.canClaimFreeChest ? 'CLAIM' : 'CLAIMED',
-                            style: LavaButtonStyle.success,
-                            height: 40,
-                            fontSize: 13,
-                            onPressed: game.canClaimFreeChest ? () => game.claimFreeChest() : null,
+                          const SizedBox(height: 10),
+                          _StreakRow(
+                            currentDay: game.canClaimFreeChest
+                                ? game.nextFreeChestStreakDay
+                                : game.profile.freeChestStreak,
+                            claimedToday: !game.canClaimFreeChest,
                           ),
                         ],
                       ),
@@ -144,6 +160,61 @@ class ResourceShopScreen extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Shows the 7-day free chest streak as a row of pips, highlighting today's
+/// slot so the reward growth (and the cost of missing a day) is visible at
+/// a glance.
+class _StreakRow extends StatelessWidget {
+  final int currentDay;
+  final bool claimedToday;
+
+  const _StreakRow({required this.currentDay, required this.claimedToday});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: List.generate(7, (i) {
+        final day = i + 1;
+        final isPast = day < currentDay || (day == currentDay && claimedToday);
+        final isCurrent = day == currentDay && !claimedToday;
+        final color = isPast
+            ? AppColors.success
+            : isCurrent
+                ? AppColors.emberGold
+                : AppColors.panelBorder;
+        return Expanded(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 2),
+            child: Column(
+              children: [
+                Container(
+                  height: 26,
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: isPast || isCurrent ? 0.9 : 0.25),
+                    borderRadius: BorderRadius.circular(6),
+                    border: isCurrent ? Border.all(color: AppColors.emberGold, width: 1.6) : null,
+                  ),
+                  alignment: Alignment.center,
+                  child: Icon(
+                    isPast
+                        ? Icons.check
+                        : day == 7
+                            ? Icons.star
+                            : Icons.circle,
+                    size: isPast || day == 7 ? 14 : 6,
+                    color: isPast || isCurrent ? Colors.white : AppColors.textMuted,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text('D$day', style: AppTextStyles.caption.copyWith(fontSize: 10)),
+              ],
+            ),
+          ),
+        );
+      }),
     );
   }
 }

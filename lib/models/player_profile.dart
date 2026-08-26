@@ -35,6 +35,10 @@ class PlayerProfile {
 
   String lastFreeChestDate;
 
+  /// Consecutive days (1-7) the free chest has been claimed without a gap.
+  /// Resets to 0 the first time a day is missed.
+  int freeChestStreak;
+
   /// Single-expedition consumables purchased in the shop. Consumed the
   /// moment an expedition starts with the booster toggled on, regardless of
   /// how that expedition ends.
@@ -64,6 +68,7 @@ class PlayerProfile {
     required this.sfxOn,
     required this.vibrationOn,
     this.lastFreeChestDate = '',
+    this.freeChestStreak = 0,
     this.drillBoosters = 0,
   });
 
@@ -92,6 +97,7 @@ class PlayerProfile {
       sfxOn: true,
       vibrationOn: true,
       lastFreeChestDate: '',
+      freeChestStreak: 0,
       drillBoosters: 0,
     );
   }
@@ -122,6 +128,7 @@ class PlayerProfile {
         'sfxOn': sfxOn,
         'vibrationOn': vibrationOn,
         'lastFreeChestDate': lastFreeChestDate,
+        'freeChestStreak': freeChestStreak,
         'drillBoosters': drillBoosters,
       };
 
@@ -220,6 +227,7 @@ class PlayerProfile {
       sfxOn: json['sfxOn'] as bool? ?? true,
       vibrationOn: json['vibrationOn'] as bool? ?? true,
       lastFreeChestDate: json['lastFreeChestDate'] as String? ?? '',
+      freeChestStreak: json['freeChestStreak'] as int? ?? 0,
       drillBoosters: json['drillBoosters'] as int? ?? 0,
     );
   }

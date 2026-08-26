@@ -76,10 +76,11 @@ class GameProvider extends ChangeNotifier {
     return remaining;
   }
 
-  String _todayKey() {
-    final n = DateTime.now();
-    return '${n.year}-${n.month}-${n.day}';
-  }
+  String _dateKey(DateTime d) => '${d.year}-${d.month}-${d.day}';
+
+  String _todayKey() => _dateKey(DateTime.now());
+
+  String _yesterdayKey() => _dateKey(DateTime.now().subtract(const Duration(days: 1)));
 
   void _refreshContractsIfNeeded() {
     final today = _todayKey();
@@ -306,11 +307,44 @@ class GameProvider extends ChangeNotifier {
 
   bool get canClaimFreeChest => profile.lastFreeChestDate != _todayKey();
 
+  /// The 1-7 streak day that will be rewarded the next time the free chest
+  /// is claimed. Missing a day (not claimed yesterday) resets it to day 1.
+  int get nextFreeChestStreakDay {
+    if (profile.lastFreeChestDate == _yesterdayKey()) {
+      return (profile.freeChestStreak % 7) + 1;
+    }
+    return 1;
+  }
+
+  ({int ore, int crystals}) get nextFreeChestReward => _freeChestReward(nextFreeChestStreakDay);
+
+  ({int ore, int crystals}) _freeChestReward(int streakDay) {
+    switch (streakDay) {
+      case 1:
+        return (ore: 120, crystals: 15);
+      case 2:
+        return (ore: 150, crystals: 18);
+      case 3:
+        return (ore: 180, crystals: 21);
+      case 4:
+        return (ore: 210, crystals: 25);
+      case 5:
+        return (ore: 240, crystals: 28);
+      case 6:
+        return (ore: 280, crystals: 32);
+      default:
+        return (ore: 400, crystals: 50);
+    }
+  }
+
   void claimFreeChest() {
     if (!canClaimFreeChest) return;
+    final streakDay = nextFreeChestStreakDay;
+    final reward = _freeChestReward(streakDay);
+    profile.freeChestStreak = streakDay;
     profile.lastFreeChestDate = _todayKey();
-    profile.ore += 120;
-    profile.crystals += 15;
+    profile.ore += reward.ore;
+    profile.crystals += reward.crystals;
     _persist();
     notifyListeners();
   }
