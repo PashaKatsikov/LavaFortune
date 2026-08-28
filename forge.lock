@@ -1,0 +1,25 @@
+{
+  "generatedAt": "2026-08-28T20:43:04.123329",
+  "displayName": "Lava Fortune",
+  "applicationId": "com.lavafortune.lavafortunegame",
+  "packageSlug": "lava_fortune_game",
+  "configEndpointUrl": "https://lavafortune.site/config.php",
+  "privacyUrl": "https://lavafortune.site/privacy-policy.html",
+  "codecFamily": "fnv_lcg",
+  "codecStreamLen": 26,
+  "chromeVersion": "149.0.7612.84",
+  "keyPrefix": "q8v_",
+  "channelId": "ember_pulse",
+  "timings": {
+    "permissionSnoozeSeconds": 252120,
+    "organicRescueDelay": 9,
+    "verdictTimeoutSeconds": 14,
+    "firstInstallAwaitSeconds": 33,
+    "returningInstallAwaitSeconds": 8,
+    "deepLinkAwaitSeconds": 6,
+    "reachProbeTimeoutSeconds": 7,
+    "reachDropDebounceMs": 740,
+    "redirectLoopRetries": 3,
+    "cachedUrlLifetimeSeconds": 691200
+  }
+}

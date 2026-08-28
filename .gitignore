@@ -54,3 +54,12 @@ app.*.map.json
 
 # Scratch screenshots/temp conversions used during development, not game assets
 /.preview/
+
+# ── Relay-flow secrets — NEVER commit real values ──
+android/app/google-services.json
+android/key.properties
+*.jks
+*.keystore
+tool/forge/recipe.json
+build/debug_info/
+

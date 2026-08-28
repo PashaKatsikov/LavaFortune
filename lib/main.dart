@@ -1,69 +1,92 @@
-import 'dart:async';
-
+import 'package:firebase_app_check/firebase_app_check.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'core/app_colors.dart';
-import 'screens/loading/loading_screen.dart';
-import 'services/attribution_service.dart';
+
+import 'app/caldera_app.dart';
+import 'app/system_ui.dart';
+import 'caldera/dock/outcome.dart';
+import 'caldera/router.dart';
+import 'caldera/lines/alerts.dart';
+import 'caldera/lines/install_trace.dart';
+import 'caldera/lines/vault.dart';
+import 'caldera/lines/ua.dart';
+import 'caldera/lines/reach.dart';
+import 'caldera/lines/gate_ask.dart';
 import 'state/game_provider.dart';
 import 'state/run_provider.dart';
 
+// ============================================================
+// main.dart — bootstrap wiring
+// ============================================================
+// Order of operations (do NOT reorder without reading the docs):
+//   1. WidgetsFlutterBinding — required before any plugin call.
+//   2. Firebase + AppCheck   — wrapped in try/catch. Failures
+//      here must NEVER block startup (the coordinator will fall
+//      back to the native game path).
+//   3. Orientations + status-bar chrome — set once here so the
+//      boot screen renders edge-to-edge on frame one.
+//   4. DeviceSignature.prime — builds the forged User-Agent used
+//      by both the HTTP client (BoreClient) and the WebView.
+//      MUST run before any bridge or the WebView is constructed.
+//   5. BeaconKeystore.prime  — reads SharedPreferences into memory
+//      so the coordinator's route decision is synchronous.
+//   6. Assemble the pipeline and mount CalderaApp.
+// ============================================================
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // Allow all orientations initially so the loading screen can be shown
-  // correctly in both portrait and landscape. The app locks to portrait
-  // once loading completes (see LoadingScreen).
-  await SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-    DeviceOrientation.portraitDown,
-    DeviceOrientation.landscapeLeft,
-    DeviceOrientation.landscapeRight,
-  ]);
-  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-    statusBarColor: Colors.transparent,
-    statusBarIconBrightness: Brightness.light,
-    systemNavigationBarColor: AppColors.backgroundDeep,
-    systemNavigationBarIconBrightness: Brightness.light,
-  ));
-  // Fire-and-forget: attribution resolves asynchronously in the background
-  // and must never delay the first frame the player sees.
-  unawaited(AttributionService.instance.init());
-  runApp(const LavaFortuneApp());
-}
 
-class LavaFortuneApp extends StatelessWidget {
-  const LavaFortuneApp({super.key});
+  try {
+    await Firebase.initializeApp();
+    await FirebaseAppCheck.instance.activate(
+      providerAndroid: kDebugMode
+          ? const AndroidDebugProvider()
+          : const AndroidPlayIntegrityProvider(),
+    );
+  } catch (_) {}
 
-  @override
-  Widget build(BuildContext context) {
-    return MultiProvider(
+  await SystemChrome.setPreferredOrientations(DeviceOrientation.values);
+  await SystemUi.hide();
+
+  await DeviceSignature.prime();
+
+  final BeaconKeystore keystore = BeaconKeystore();
+  await keystore.prime();
+
+  final PulseProbe probe = PulseProbe();
+  final InstallTrace pulse = InstallTrace();
+  final GateAsk verdict = GateAsk(keystore);
+  final AlertChannel alerts = AlertChannel(keystore);
+
+  final RelayCoordinator coordinator = RelayCoordinator(
+    keystore: keystore,
+    probe: probe,
+    pulse: pulse,
+    verdict: verdict,
+    alerts: alerts,
+  );
+
+  // Adapter check is a few milliseconds and does not DNS-probe.
+  // Doing it here means the first Flutter frame is already nowifi
+  // on a cold airplane-mode launch, instead of a filled loading bar.
+  final bool startOffline = keystore.route != TrailMark.native &&
+      !await probe.hasAdapter();
+
+  runApp(
+    MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => GameProvider()),
         ChangeNotifierProvider(create: (_) => RunProvider()),
       ],
-      child: MaterialApp(
-        title: 'Lava Fortune',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          useMaterial3: true,
-          brightness: Brightness.dark,
-          scaffoldBackgroundColor: AppColors.background,
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: AppColors.lavaOrange,
-            brightness: Brightness.dark,
-          ),
-          fontFamily: 'Roboto',
-        ),
-        // The HUD, lane cards and resource chips are laid out at fixed sizes,
-        // so very large system font settings would clip them.
-        builder: (context, child) => MediaQuery.withClampedTextScaling(
-          minScaleFactor: 1.0,
-          maxScaleFactor: 1.15,
-          child: child ?? const SizedBox.shrink(),
-        ),
-        home: const LoadingScreen(),
+      child: CalderaApp(
+        coordinator: coordinator,
+        keystore: keystore,
+        alerts: alerts,
+        startOffline: startOffline,
       ),
-    );
-  }
+    ),
+  );
 }

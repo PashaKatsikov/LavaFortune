@@ -1,0 +1,32 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!--
+      Fire glyph: a tall tongue with a curled side tongue, and the inner
+      flame punched out as a hole. The status bar keeps only the alpha
+      channel, so the inner flame has to be a cutout — a second colour
+      would flatten into the same white blob.
+    -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:fillType="evenOdd"
+        android:pathData="M13.4,1.7
+C14.1,4.9 15.6,6.7 17.0,8.4
+C18.7,10.5 19.4,12.8 19.4,15.3
+C19.4,19.2 16.1,22.4 12.0,22.4
+C7.9,22.4 4.6,19.2 4.6,15.3
+C4.6,12.7 5.7,10.4 7.6,8.5
+C7.2,10.4 7.7,12.2 9.0,13.4
+C10.8,10.9 11.6,7.4 11.6,4.6
+C11.9,3.6 12.6,2.7 13.4,1.7
+Z
+M12.1,12.2
+C12.7,13.5 14.4,14.6 14.4,16.9
+C14.4,18.8 13.3,20.1 11.9,20.1
+C10.5,20.1 9.4,18.8 9.4,17.1
+C9.4,15.4 10.5,14.4 11.2,13.5
+C11.6,13.1 11.9,12.7 12.1,12.2
+Z" />
+</vector>
