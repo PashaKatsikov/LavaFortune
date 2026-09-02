@@ -32,7 +32,7 @@ android {
     defaultConfig {
         applicationId = "com.lavafortune.lavafortunegame"
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 36
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
